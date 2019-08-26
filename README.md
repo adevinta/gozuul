@@ -1,5 +1,7 @@
 # Gozuul
 
+[![Build Status](https://travis-ci.org/adevinta/gozuul.svg?branch=master)](https://travis-ci.org/adevinta/gozuul)
+
 Go library and cli that provides methods to scan Netflix Zuul instances in relation to the Netflix [nflx-2016-003](https://github.com/Netflix/security-bulletins/blob/master/advisories/nflx-2016-003.md) Security Advisory.
 
 It has two methods: `PassiveScan` and `ActiveScan`. The first one is safe because it only tries to `POST` to a specific URL without uploading a file, but the second method makes modifications in the target server (if it is vulnerable), because it uploads a payload that when executed by the server makes a callback to the specified callback URL.
