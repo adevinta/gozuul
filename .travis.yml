@@ -1,0 +1,8 @@
+language: go
+go:
+- 1.9
+env:
+  global:
+  - CGO_ENABLED=0
+go_import_path: github.com/adevinta/gozuul
+script: go test -v -short -cover ./...
