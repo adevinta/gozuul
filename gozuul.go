@@ -3,6 +3,7 @@ package gozuul
 
 import (
 	"bytes"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
@@ -85,7 +86,7 @@ func ActiveScan(target, callback string, callbackRec chan bool) (rs ResultSet, e
 	if target == "" {
 		return rs, fmt.Errorf("target can not be empty, target: %s", target)
 	} else if callbackRec == nil || cap(callbackRec) < 1 {
-		return rs, fmt.Errorf("channel can not be nil and must be buffered. callbackRec: %s, capacity: %s", callbackRec, cap(callbackRec))
+		return rs, fmt.Errorf("channel can not be nil and must be buffered. callbackRec: %v, capacity: %v", callbackRec, cap(callbackRec))
 	}
 
 	// Check if filter is already enabled before continue with the scan.
@@ -131,7 +132,7 @@ func ActiveScan(target, callback string, callbackRec chan bool) (rs ResultSet, e
 	}
 
 	if nRev <= cRev {
-		return rs, fmt.Errorf("revision didn't increase after filter upload. prev: %s. curr: %s", cRev, nRev)
+		return rs, fmt.Errorf("revision didn't increase after filter upload. prev: %v. curr: %v", cRev, nRev)
 	}
 
 	// Activate the filter and wait some time until it becomes active.
@@ -251,10 +252,16 @@ func upload(URL string, f multipart.File, filename string) (res *http.Response, 
 	req.Header.Set("Content-Type", w.FormDataContentType())
 
 	// Submit the request
+	timeout := 5 * time.Second
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
+		Transport: tr,
+		Timeout:   timeout,
 	}
 	res, err = client.Do(req)
 
@@ -355,7 +362,19 @@ type tinyHTTPRes struct {
 // quickGet makes a HTTP GET to the specified URL and returns the tinyHTTPRes
 // related.
 func quickGet(URL string) (tin *tinyHTTPRes, err error) {
-	res, err := http.Get(URL)
+	timeout := 5 * time.Second
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+		Transport: tr,
+		Timeout:   timeout,
+	}
+
+	res, err := client.Get(URL)
 	if err != nil {
 		return
 	}
@@ -372,10 +391,16 @@ func quickGet(URL string) (tin *tinyHTTPRes, err error) {
 // setFilterAction makes a request to the target to change the action (state)
 // of a zuul filter, for its specified revision.
 func setFilterAction(URL, id, action string, rev int) error {
+	timeout := 5 * time.Second
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
+		Transport: tr,
+		Timeout:   timeout,
 	}
 
 	res, err := client.PostForm(URL, url.Values{"filter_id": {id}, "action": {action}, "revision": {strconv.Itoa(rev)}})
