@@ -1,3 +1,7 @@
+/*
+Copyright 2021 Adevinta
+*/
+
 // +build ignore
 
 // Command genresources reads a set of files and writes a Go source file to "static.go"
