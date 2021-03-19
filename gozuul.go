@@ -1,3 +1,7 @@
+/*
+Copyright 2019 Adevinta
+*/
+
 //Package gozuul provides methods to scan Netflix Zuul instances in relation to the Netflix nflx-2016-003 Security Advisory.
 package gozuul
 
